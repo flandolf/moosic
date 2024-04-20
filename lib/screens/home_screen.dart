@@ -1,6 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:moosic/screens/audio_player.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,32 +14,52 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<String> files = [];
+  List<String> filePaths = [];
 
   @override
   void initState() {
     super.initState();
     getStoragePermission(context);
-    files = listMusicFiles();
+    setMusicFiles();
   }
 
-  List<String> listMusicFiles() {
+  void setMusicFiles() {
     List<String> musicFiles = [];
+    List<String> audioExtensions = [
+      '.mp3',
+      '.wav',
+      '.ogg',
+      '.aac',
+      '.flac'
+    ]; // Add more extensions if needed
+
     try {
-      print(Directory("/sdcard/Music").statSync());
       if (Directory("/sdcard/Music").existsSync()) {
         Directory musicDir = Directory("/sdcard/Music");
-        List files = musicDir.listSync();
+        List<FileSystemEntity> files = musicDir.listSync();
+
+        for (var file in files) {
+          if (file is File) {
+            String extension = file.path.split('.').last.toLowerCase();
+            if (audioExtensions.contains('.$extension')) {
+              musicFiles.add(file.path);
+            }
+          }
+        }
+
+        setState(() {
+          filePaths = musicFiles;
+        });
+
         print(files);
       }
     } catch (e) {
       print('Error: $e');
     }
-    return musicFiles;
   }
 
   void getStoragePermission(BuildContext context) async {
-    var status = await Permission.storage.status;
+    var status = await Permission.audio.status;
     if (status.isDenied && context.mounted) {
       showDialog(
         context: context,
@@ -48,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
             actions: <Widget>[
               TextButton(
                 onPressed: () async {
-                  await Permission.storage.request();
+                  await Permission.audio.request();
                   if (context.mounted) Navigator.of(context).pop();
                 },
                 child: const Text('OK'),
@@ -63,25 +86,37 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: const Text("Moosic!"),
+          actions: [
+            IconButton(
+                onPressed: setMusicFiles, icon: const Icon(Icons.refresh))
+          ],
+        ),
         body: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 40),
-      child: Column(
-        children: [
-          FilledButton(onPressed: () {
-            files = listMusicFiles();
-          }, child: Text("Refresh (DEV)")),
-          Expanded(
-            child: ListView.builder(
-              itemCount: files.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(files[index]),
-                );
-              },
-            ),
-          )
-        ],
-      ),
-    ));
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filePaths.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(filePaths[index]),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AudioPlayerScreen(filePath: filePaths[index]),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              )
+            ],
+          ),
+        ));
   }
 }

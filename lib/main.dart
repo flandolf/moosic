@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:moosic/screens/home_screen.dart';
 
 void main() {
+  MediaKit.ensureInitialized();
   runApp(const BaseApp());
 }
 
