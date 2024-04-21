@@ -1,3 +1,4 @@
+![Banner](moosic.png)
 # Moosic 🎶 🚧
 
 Moosic is a simple music player app built with Flutter. It allows users to play audio files stored on their device with
