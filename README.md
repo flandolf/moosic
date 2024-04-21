@@ -23,13 +23,9 @@ basic playback controls and a user-friendly interface.
 
 To get started with Moosic, follow these steps:
 
-Clone the repository:
-`
-git clone https://github.com/your-username/moosic.git`
+Clone the repository:`git clone https://github.com/flandolf/moosic.git`
 
-Navigate to the project directory:
-`
-cd moosic`
+Navigate to the project directory:`cd moosic`
 
 When the app launches, it will display a list of audio files in `/sdcard/Music`.
 Tap on a track to start playback.
